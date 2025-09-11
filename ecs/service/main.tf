@@ -1,6 +1,6 @@
 # Locals
 locals {
-  lb_port             = 443
+  lb_port = 443
 }
 
 # DATA
@@ -40,7 +40,7 @@ data "aws_route53_zone" "main" {
 # ECR REPO
 resource "aws_ecr_repository" "service_repo" {
   count = var.env == "prd" ? 1 : 0
-  name = "${var.service_name}"
+  name  = var.service_name
 }
 
 # INITIAL ECS TASK
@@ -75,10 +75,10 @@ resource "aws_security_group" "lb" {
   }
 
   ingress {
-    protocol        = "tcp"
-    from_port       = local.lb_port
-    to_port         = local.lb_port
-    cidr_blocks     = ["0.0.0.0/0"]
+    protocol    = "tcp"
+    from_port   = local.lb_port
+    to_port     = local.lb_port
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -116,12 +116,12 @@ resource "aws_security_group" "task_sg" {
 
 # ECS SERVICE
 resource "aws_ecs_service" "service" {
-  name                  = "${var.env}-${var.service_name}-ecs-service"
-  cluster               = var.cluster_arn
-  task_definition       = aws_ecs_task_definition.initial.arn
-  launch_type           = "FARGATE"
-  scheduling_strategy   = "REPLICA"
-  desired_count         = var.env == "prd" ? 2 : 1
+  name                = "${var.env}-${var.service_name}-ecs-service"
+  cluster             = var.cluster_arn
+  task_definition     = aws_ecs_task_definition.initial.arn
+  launch_type         = "FARGATE"
+  scheduling_strategy = "REPLICA"
+  desired_count       = var.service_desired_count != null ? var.service_desired_count : (var.env == "prd" ? 2 : 1)
 
   tags = {
     Name    = "${var.env}-${var.service_name}-ecs-service"
@@ -140,7 +140,7 @@ resource "aws_ecs_service" "service" {
   }
 
   network_configuration {
-    subnets = data.aws_subnets.private.ids
+    subnets         = data.aws_subnets.private.ids
     security_groups = [aws_security_group.task_sg.id]
   }
 
@@ -148,7 +148,7 @@ resource "aws_ecs_service" "service" {
     ignore_changes = [task_definition]
   }
 
-  depends_on = [ aws_lb.main, aws_lb_listener.service ]
+  depends_on = [aws_lb.main, aws_lb_listener.service]
 }
 
 # Task Role Permissions
