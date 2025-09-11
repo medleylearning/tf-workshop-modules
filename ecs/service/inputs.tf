@@ -29,7 +29,7 @@ variable "service_port" {
 }
 
 variable "service_desired_count" {
-  description = "Desired replica count of the ECS Service. If not set, defaults to 2 for prd environment and 1 for others"
+  description = "Desired replica count of the ECS Service."
   type        = number
   default     = null
 }
