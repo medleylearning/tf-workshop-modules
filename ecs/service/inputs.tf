@@ -28,3 +28,8 @@ variable "service_port" {
   type        = number
 }
 
+variable "service_desired_count" {
+  description = "Desired replica count of the ECS Service."
+  type        = number
+  default     = null
+}
